@@ -27,49 +27,56 @@ module.exports = {
     }
   },
   async create(req, res) {
-    const produto = req.body || -1;
+    const produto = req.body.produto || -1;
     if (produto) {
       const xml = builder.create('produto')
-      xml.ele('codigo', produto.codigo)
-      xml.ele('descricao', produto.desc_at)
-      xml.ele('situacao', "Ativo")
-      xml.ele('descricaoCurta', produto.descricaocurta)
-      xml.ele('descricaoComplementar', produto.descricaocurta)
-      xml.ele('un', 'Pc')
-      xml.ele('vlr_unit', produto.preco_sugerido)
-      xml.ele('preco_custo', '1.23')
-      xml.ele('peso_bruto', '0.2')
-      xml.ele('peso_liq', produto.peso_cub)
-      xml.ele('altura', produto.altura)
-      xml.ele('largura', produto.largura)
-      xml.ele('profundidade', produto.prof)
-      xml.ele('class_fiscal', produto.class_fiscal)
-      xml.ele('origem', produto.trib_a)
-      xml.ele('estoque', produto.estoque_disponivel_02 + produto.estoque_disponivel_08)
-      xml.ele('imagens')
-        .ele('url', produto.url_imagem_web)
-      .end()
-      xml.end({ pretty: true })
 
       try {
-        axios
+
+        xml.ele('codigo', produto.codigo)
+        xml.ele('descricao', produto.desc_at)
+        xml.ele('situacao', "Ativo")
+        xml.ele('descricaoCurta', produto.descricao)
+        xml.ele('descricaoComplementar', produto.descricao)
+        xml.ele('un', 'Pc')
+        xml.ele('vlr_unit', produto.preco_sugerido)
+        xml.ele('peso_liq', produto.peso_cub)
+        xml.ele('altura', produto.altura)
+        xml.ele('largura', produto.largura)
+        xml.ele('profundidade', produto.prof)
+        xml.ele('class_fiscal', produto.class_fiscal)
+        xml.ele('origem', produto.trib_a)
+        xml.ele('estoque', produto.estoque_disponivel_02 + produto.estoque_disponivel_08)
+        /* xml.ele('imagens')
+          .ele('url', produto.url_imagem_web)
+          .end() */
+        xml.end({ pretty: true })
+
+        await axios
           .post(`https://bling.com.br/Api/v2/produto/json?apikey=${process.env.BLING_API_KEY}&xml=${xml}`, {
             headers: {
               'Content-Type': 'application/json',
             }
           })
           .catch(error => {
-            throw new Error("bling/:sku create() ->", error)
+            throw error
           })
           .then(response => {
-            const produtos = response.data.retorno.produtos;
-            console.log(produtos);
+            if (response.data.retorno.erros) {
+              const errorsObject = response.data.retorno.erros;
+              errorsObject.forEach(error => {
+                console.log("Bling error code:", error.erro.cod)
+                console.log("Erro:", error.erro.msg)
+              })
 
-            res.send(produtos);
+              return res.send(errorsObject);
+            }
+
+            res.send(response.data);
           })
 
       } catch (error) {
-        throw new Error("bling/:sku create() -> ", error)
+        throw new Error("bling/ create() -> ", error)
       }
 
     }

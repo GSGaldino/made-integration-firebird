@@ -4,28 +4,6 @@ const helpers = require('./helpers');
 const axios = require('axios');
 require('dotenv').config();
 
-/**
- * Index function that take database in the execution time
- * @param {ExpressRequisition} req the requisition object
- * @param {ExpressResponse} res response that will be back to the client
- * @returns {JSON} with all products and their descriptions
- */
-/* async function index(req, res) {
-  fs.readFile('database.json', (err, content) => {
-    if (err)
-      console.log(err)
-
-    const data = JSON.parse(content);
-
-    res
-      .status(200)
-      .json({
-        database_length: data.length,
-      })
-
-  })
-} */
-
 async function init() {
   console.log('===================================================');
   console.log("Initializing firebird integration tool:", "firebird/init()");
@@ -55,10 +33,29 @@ async function init() {
     console.log("Success loaded database");
     console.log("database.length", data.length);
 
-    /* const response = await axios.get(`http://localhost:${process.env.PORT || 3333}/api/bling/36474`);
-    const produto = await response.data[0].produto; */
+    for (let i = 0; i <= data.length; i++) {
+      const produto = data[i];
+      console.log('===================================================');
+      console.log("Fetching bling API - create new product | codigo:", data[i].codigo);
 
-    // TODO create integration between bling and firebird to migrate all products to database
+      try {
+        await axios.post(`${process.env.BACKEND_URL}:${process.env.PORT}/api/bling`, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          produto,
+        })
+          .then(response => {
+            console.log('===================================================');
+            console.log("success registered product | id:", response.data.retorno.produtos[0].produto.id);
+          })
+          .catch(error => console.log(error))
+      } catch (error) {
+        throw error
+      }
+
+    }
+
   });
 
 }
