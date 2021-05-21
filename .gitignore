@@ -1,2 +1,11 @@
 node_modules/
+
+# Environment variables
 .env
+
+# Local database created in execution time
+database.json
+
+# lock files
+yarn.lock
+package.lock.json

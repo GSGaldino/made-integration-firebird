@@ -1,9 +1,7 @@
 const router = require("express").Router();
+const blingController = require('./controllers');
 
-router.get("/", (req, res) => {
-  res.json({
-    message: "Default bling route."
-  })
-})
+router.get('/:sku', blingController.index);
+router.post('/', blingController.create);
 
 module.exports = router;

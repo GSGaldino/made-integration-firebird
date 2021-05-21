@@ -60,6 +60,10 @@ class Produto {
   this.url_imagem_web = 
     database_row["URL_IMAGEM_WEB"] 
       ? database_row["URL_IMAGEM_WEB"].toString() 
+      : null,
+  this.ativointernet = 
+    database_row["ATIVOINTERNET"] 
+      ? database_row["ATIVOINTERNET"].toString() 
       : null
   }
 }
