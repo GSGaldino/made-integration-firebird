@@ -39,6 +39,7 @@ module.exports = {
             // Close the connection
             db.detach();
           });
+
         });
       } catch (error) {
         reject(error);
@@ -49,6 +50,6 @@ module.exports = {
       .catch(error => {throw error})
       .then(response => data = response);
 
-    return data.map(produto => new Produto(produto));
+    return data.map(product => new Produto(product));
   }
 };

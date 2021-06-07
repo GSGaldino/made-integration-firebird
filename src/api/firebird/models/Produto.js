@@ -2,6 +2,23 @@ class Produto {
   constructor(database_row) {
 
   this.codigo = database_row["PRODUTO"] ? database_row["PRODUTO"].toString('binary') : null,
+  this.marca = database_row["MARCA"] ? database_row["MARCA"].toString() : null,
+  this.credito_icms_st = database_row["CREDITO_ICMS_ST_03"] ? database_row["CREDITO_ISMC_ST_03"].toString() : null,
+  this.valor_iva = database_row["VALOR_IVA_03"] 
+    ? database_row["VALOR_IVA_03"].toString() 
+    : null,
+  this.valor_icms = database_row["VALOR_ICMS_03"] 
+    ? database_row["VALOR_ICMS_03"].toString() 
+    : null,
+  this.valor_ipi = database_row["VALOR_IPI_03"] 
+    ? database_row["VALOR_IPI_03"].toString()
+    : null,
+  this.valor_pis = database_row["VALOR_PIS_03"] 
+    ? database_row["VALOR_PIS_03"].toString() 
+    : null,
+  this.valor_cofins = database_row["VALOR_COFINS_03"] 
+    ? database_row["VALOR_COFINS_03"].toString() 
+    : null,
   this.descricao = database_row["DESCRICAO"] 
     ?  database_row["DESCRICAO"]
         .toString('binary') 
