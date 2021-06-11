@@ -103,7 +103,26 @@ module.exports = {
     } catch (error) {
       throw error;
     }
+  },
 
+  async getTimestamp() {
+
+    try {
+
+      // Create new date object on execition-time
+      const date = new Date();
+
+      // Defining hour, minute and second on format 00:00:00
+      const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+
+      // Defining date in format DD/MM/AAAA
+      const formattedDate = `${date.getDate()}/${(date.getMonth() + 1)}/${date.getFullYear()}`;
+
+      return `${formattedDate} - ${time}`;
+
+    } catch (error) {
+      throw error;
+    }
   }
 
 }

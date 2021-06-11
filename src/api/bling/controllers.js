@@ -1,6 +1,8 @@
 const builder = require('xmlbuilder');
 const axios = require('axios');
+const helpers = require('./helpers');
 require('dotenv').config();
+require('url').URL;
 
 module.exports = {
 
@@ -18,9 +20,8 @@ module.exports = {
             throw new Error("bling/:sku index() ->", error)
           })
           .then(response => response.data.retorno.produtos)
-          .then(product => {
-            res.send(product)
-          })
+          .then(product => res.send(product))
+
       } catch (error) {
         throw new Error("bling/:sku index() -> ", error)
       }
@@ -34,6 +35,8 @@ module.exports = {
       try {
 
         xml.ele('codigo', produto.codigo)
+        xml.ele('marca', produto.marca)
+        xml.ele('gtin', produto.ean)
         xml.ele('descricao', produto.desc_at)
         xml.ele('situacao', "Ativo")
         xml.ele('descricaoCurta', produto.descricao)
@@ -46,12 +49,34 @@ module.exports = {
         xml.ele('profundidade', produto.prof)
         xml.ele('class_fiscal', produto.class_fiscal)
         xml.ele('origem', produto.trib_a)
-        xml.ele('estoque', produto.estoque_disponivel_02 + produto.estoque_disponivel_08)
-        /* xml.ele('imagens')
-          .ele('url', produto.url_imagem_web)
-          .end() */
+        xml.ele('estoque', (Number(produto.estoque_disponivel_01) + Number(produto.estoque_disponivel_02) + Number(produto.estoque_disponivel_08)))
+
+        // Get fbits urls and append to main xml
+        const imagesTag = xml.ele('imagens');
+        const imagesUrls = await helpers.getUrls(produto.codigo);
+
+        try {
+          if (imagesUrls) {
+            for (product of imagesUrls) {
+              const imageUrl = new URL(product.url);
+              const encoded = `${imageUrl.origin}${imageUrl.pathname}`;
+
+              function fixedEncodeURI(str) {
+                return encodeURI(str).replace(/%5B/g, '[').replace(/%5D/g, ']');
+              }
+
+              imagesTag.ele('url', fixedEncodeURI(encoded));
+            };
+          }
+
+        } catch (error) {
+          throw error;
+        }
+        imagesTag.end()
+
         xml.end({ pretty: true })
 
+        // Send API requisition to Bling
         await axios
           .post(`https://bling.com.br/Api/v2/produto/json?apikey=${process.env.BLING_API_KEY}&xml=${xml}`, {
             headers: {
@@ -65,10 +90,10 @@ module.exports = {
             if (response.data.retorno.erros) {
               const errorsObject = response.data.retorno.erros;
               errorsObject.forEach(error => {
-                console.log("Bling error code:", error.erro.cod)
-                console.log("Erro:", error.erro.msg)
+                console.log("Erro:", error)
               })
 
+              // If had an error, send object returned by bling API
               return res.send(errorsObject);
             }
 
@@ -76,7 +101,7 @@ module.exports = {
           })
 
       } catch (error) {
-        throw new Error("bling/ create() -> ", error)
+        console.log(error);
       }
 
     }

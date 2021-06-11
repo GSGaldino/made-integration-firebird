@@ -4,29 +4,6 @@ const helpers = require('./helpers');
 const axios = require('axios');
 require('dotenv').config();
 
-/* for (let i = 0; i <= data.length; i++) {
-    const produto = data[i];
-    console.log('===================================================');
-    console.log("Fetching bling API - create new product | codigo:", data[i].codigo);
-
-    try {
-      await axios.post(`${process.env.BACKEND_URL}:${process.env.PORT}/api/bling`, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        produto,
-      })
-        .then(response => {
-          console.log('===================================================');
-          console.log("success registered product | id:", response.data.retorno.produtos[0].produto.id);
-        })
-        .catch(error => console.log(error))
-    } catch (error) {
-      throw error
-    }
-
-  } */
-
 async function init() {
   console.log('===================================================');
   console.log("Initializing firebird integration tool:", "firebird/init()");
@@ -59,11 +36,11 @@ async function readDatabase() {
   return await data;
 }
 
-async function updateDatabase(data) {
+async function updateDatabase(oldDatabase, newDatabase) {
 
   const updates = await helpers.getDatabaseUpdates({
-    oldDatabase: data,
-    newDatabase: await services.getProducts()
+    oldDatabase: oldDatabase,
+    newDatabase: newDatabase
   });
 
   if (updates.haveNewProducts) {
