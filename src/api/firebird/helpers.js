@@ -1,4 +1,5 @@
 const fs = require('fs');
+const axios = require('axios');
 
 const DATABASE_PATH = "database.json";
 const LAST_UPDATE_PATH = "last_update.timestamp.json";
@@ -11,7 +12,7 @@ const updateLastUpdateFile = () => {
 };
 
 module.exports = {
-  async readLocalDatabase(){
+  async readLocalDatabase() {
     try {
       // Read local database and return it parsed
       return await JSON.parse(fs.readFileSync(DATABASE_PATH, readConfig));
@@ -37,10 +38,6 @@ module.exports = {
   async getDatabaseUpdates({ oldDatabase, newDatabase }) {
     // Initial array with database updates
     const databaseUpdates = {};
-
-    // Boolean that see databases length
-    const haveNewProducts = oldDatabase.length < newDatabase.length;
-    databaseUpdates.haveNewProducts = haveNewProducts;
 
     // Get new products by intersection between arrays
     databaseUpdates.newProducts = newDatabase.filter(product => !oldDatabase.some(oldProduct => {
@@ -80,6 +77,36 @@ module.exports = {
     }
   },
 
+  async updateLocaldatabaseProduct(product) {
+    try {
+      fs.readFile(DATABASE_PATH, readConfig, async (err, content) => {
+
+        // Converts data to JSON and append new products
+        const data = JSON.parse(content);
+
+        // Update product on local database
+        data.forEach((oldProduct, index) => {
+          if(oldProduct.codigo === product.codigo){
+            data[index] = product;
+          }
+        })
+
+        fs.writeFile(DATABASE_PATH, JSON.stringify(data), 'utf-8', (error, newContent) => {
+          if (error) { console.log(error) };
+
+          console.log('===================================================');
+          console.log("Success updated product SKU:", product.codigo);
+        })
+
+        // Update log file
+        updateLastUpdateFile();
+
+      })
+    } catch (error) {
+      throw error
+    }
+  },
+
   async getLastUpdate() {
 
     try {
@@ -105,7 +132,7 @@ module.exports = {
     }
   },
 
-  async getTimestamp() {
+  async getTime() {
 
     try {
 
@@ -122,6 +149,33 @@ module.exports = {
 
     } catch (error) {
       throw error;
+    }
+  },
+
+  async addProductsToBling(products) {
+    for (let i = 0; i < products.length; i++) {
+      const produto = products[i];
+      console.log('===================================================');
+      console.log("Fetching bling API - create new product | codigo:", products[i].codigo && products[i].codigo);
+      console.log("Updating", i + 1, "of", products.length, "products.");
+
+      try {
+
+        await axios.post(`${process.env.BACKEND_URL}:${process.env.PORT}/api/bling`, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          produto,
+        })
+          .then(response => {
+            console.log('===================================================');
+            console.log("success registered product | id:", response.data.retorno.produtos[0].produto.id);
+          })
+          .catch(error => console.log(error))
+
+      } catch (error) {
+        throw error
+      }
     }
   }
 

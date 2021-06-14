@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const helpers = require('./helpers');
 const services = require('./services');
-const axios = require('axios');
 
 const firebirdController = require('./controllers');
 
@@ -19,41 +18,44 @@ async function databaseUpdateLooper() {
   const newDatabase = await services.getProducts();
   await firebirdController.updateDatabase(localDatabase, newDatabase);
 
-  // Aways log last update for better management
+  // Loop through arrays and search for objects specifics differences
+  console.log("Searching for price or stock updates ...");
+  localDatabase.forEach((oldProduct) => {
+    newDatabase.forEach(newProduct => {
+
+      // Take the mirror product
+      if (oldProduct.codigo === newProduct.codigo){
+
+        // Calcula os estoques
+        const estoqueAntigo = Number(oldProduct.estoque_disponivel_01) + Number(oldProduct.estoque_disponivel_02) + Number(oldProduct.estoque_disponivel_08);
+        const estoqueNovo = Number(newProduct.estoque_disponivel_01) + Number(newProduct.estoque_disponivel_02) + Number(newProduct.estoque_disponivel_08);
+        
+        // Get the differences booleans
+        const isPriceDifferent = oldProduct.preco_sugerido !== newProduct.preco_sugerido;
+        const isEstoqueDifferent = estoqueNovo !== estoqueAntigo;
+
+        if(isPriceDifferent || isEstoqueDifferent) {
+          try {
+            helpers.updateLocaldatabaseProduct(newProduct);
+            helpers.addProductsToBling([newProduct]);
+          } catch (error) {
+            throw error;
+          }
+        };
+
+      };
+    })
+  })  
+
+  // Aways log lastest update for better management
   console.log("Last update:", (await helpers.getLastUpdate()));
-  console.log("Verification date:", (await helpers.getTimestamp()));
-
-  for (let i = 0; i <= localDatabase.length; i++) {
-    const produto = localDatabase[i];
-    console.log('===================================================');
-    console.log("Fetching bling API - create new product | codigo:", localDatabase[i].codigo);
-    console.log("Updating", i + 1, "of", localDatabase.length, "products.");
-    try {
-
-      await axios.post(`${process.env.BACKEND_URL}:${process.env.PORT}/api/bling`, {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        produto,
-      })
-        .then(response => {
-          console.log('===================================================');
-          console.log("success registered product | id:", response.data.retorno.produtos[0].produto.id);
-        })
-        .catch(error => console.log(error))
-
-    } catch (error) {
-      throw error
-    }
-  }
+  console.log("Verification date:", (await helpers.getTime()));
 };
 
 // Looper and update logger
-/* const fiveMinutesInMilliseconds = 300000;
+const fiveMinutesInMilliseconds = 300000;
 setInterval(async () => {
   databaseUpdateLooper();
-}, fiveMinutesInMilliseconds); */
-
-databaseUpdateLooper();
+}, fiveMinutesInMilliseconds);
 
 module.exports = router;

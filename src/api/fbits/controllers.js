@@ -12,7 +12,7 @@ module.exports = {
       })
       return response.data;
     } catch (error) {
-      throw new Error("fbits/getImages() -> ", error);
+      throw error;
     }
   }
 }

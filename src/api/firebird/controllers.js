@@ -43,14 +43,22 @@ async function updateDatabase(oldDatabase, newDatabase) {
     newDatabase: newDatabase
   });
 
-  if (updates.haveNewProducts) {
+  if (updates.newProducts && updates.productsLength && updates.productsLength > 0) {
     console.log('===================================================');
     console.log("You have", updates.productsLength, "products available to update");
 
     // Append new products to local database
-    helpers.addProductsToLocalDatabase(updates.newProducts);
-
     console.log("Appending", updates.productsLength, "products to local database")
+    helpers.addProductsToLocalDatabase(updates.newProducts);
+    
+    // async call to bling API with new products
+    console.log("Appending", updates.productsLength, "products bling database")
+    try {
+      helpers.addProductsToBling(updates.newProducts);
+    } catch (error) {
+      throw error;
+    }
+
   } else if (!updates.haveNewProducts) {
     console.log('===================================================');
     console.log("No updates available");
