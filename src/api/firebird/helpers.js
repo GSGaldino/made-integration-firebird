@@ -86,7 +86,7 @@ module.exports = {
 
         // Update product on local database
         data.forEach((oldProduct, index) => {
-          if(oldProduct.codigo === product.codigo){
+          if (oldProduct.codigo === product.codigo) {
             data[index] = product;
           }
         })
@@ -156,8 +156,8 @@ module.exports = {
     for (let i = 0; i < products.length; i++) {
       const produto = products[i];
       console.log('===================================================');
-      console.log("Fetching bling API - create new product | codigo:", products[i].codigo && products[i].codigo);
-      console.log("Updating", i + 1, "of", products.length, "products.");
+      console.log("Fetching bling API - create new product | codigo:", produto.codigo);
+      console.log("Adicionando", i + 1, "de", products.length, "produtos.");
 
       try {
 
@@ -177,6 +177,13 @@ module.exports = {
         throw error
       }
     }
+  },
+
+  async sleep(ms) {
+    return new Promise((resolve) => {
+      console.log(`Sleeping ${ms} millisseconds`)
+      setTimeout(resolve, ms);
+    });
   }
 
 }

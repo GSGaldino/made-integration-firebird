@@ -21,7 +21,7 @@ async function databaseUpdateLooper() {
   // Loop through arrays and search for objects specifics differences
   console.log("Searching for price or stock updates ...");
   localDatabase.forEach((oldProduct) => {
-    newDatabase.forEach(newProduct => {
+    newDatabase.forEach(async newProduct => {
 
       // Take the mirror product
       if (oldProduct.codigo === newProduct.codigo){
@@ -36,8 +36,8 @@ async function databaseUpdateLooper() {
 
         if(isPriceDifferent || isEstoqueDifferent) {
           try {
-            helpers.updateLocaldatabaseProduct(newProduct);
-            helpers.addProductsToBling([newProduct]);
+            await helpers.updateLocaldatabaseProduct(newProduct);
+            await helpers.addProductsToBling([newProduct]);
           } catch (error) {
             throw error;
           }

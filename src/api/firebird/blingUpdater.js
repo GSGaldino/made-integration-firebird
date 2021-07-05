@@ -23,8 +23,6 @@ app.listen(port, () => console.log(`Update server listening on port: ${port} | R
     console.log('===================================================');
     console.log("Fetching bling API - create new product | codigo:", localDatabase[i].codigo);
     console.log("Updating", i + 1, "of", localDatabase.length, "products.");
-
-    // TODO encapsular try catch numa função que caso retorne erro, aguarde alguns segundos para refazer a requisição para a API da fbits
     
     try {
 
@@ -38,10 +36,11 @@ app.listen(port, () => console.log(`Update server listening on port: ${port} | R
           console.log('===================================================');
           console.log("success registered product | id:", response.data.retorno.produtos[0].produto.id);
         })
-        .catch(error => console.log(error))
+        .catch(error => console.log(error.status));
 
     } catch (error) {
-      throw error
+      throw error;
     }
   }
-})()
+
+})();
