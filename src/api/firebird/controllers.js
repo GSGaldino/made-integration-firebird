@@ -1,28 +1,26 @@
-const fs = require('fs');
-const services = require('./services');
+const Database = require('./Database');
 const helpers = require('./helpers');
-const axios = require('axios');
 require('dotenv').config();
 
+const database = new Database();
+
+/* A função init se responsabiliza por garantir que o arquivo database.json exista, estando ele corrompido ou não */
 async function init() {
   console.log('===================================================');
   console.log("Initializing firebird integration tool:", "firebird/init()");
 
   // Get boolean that verify if database.json archive already exists
-  const databaseExists = await helpers.databaseExists();
+  const databaseExists = database.alreadyExists();
   console.log('===================================================');
   console.log("Database exists:", databaseExists);
 
-  // Verify if database doesn't exists
   if (!databaseExists) {
-    console.log("You have not database yet");
+    // Create new local database
+    await database.new();
+    console.log('===================================================');
+    console.log("Success created local database");
+  };
 
-    // Get all products in firebird
-    const data = await services.getProducts();
-
-    // Create local database using file system
-    await helpers.createLocalDatabase(data);
-  }
 }
 
 async function readDatabase() {
@@ -30,27 +28,27 @@ async function readDatabase() {
   console.log("Reading database ...");
 
   // Read database if already have it
-  const data = await helpers.readLocalDatabase();
+  const data = await database.read();
 
   console.log("database.length:", data && data.length);
-  return await data;
+  return data;
 }
 
 async function updateDatabase(oldDatabase, newDatabase) {
 
-  const updates = await helpers.getDatabaseUpdates({
+  const updates = await database.getUpdates({
     oldDatabase: oldDatabase,
     newDatabase: newDatabase
   });
 
   if (updates.newProducts && updates.productsLength && updates.productsLength > 0) {
-    console.log('===================================================');
-    console.log("You have", updates.productsLength, "products available to update");
 
     // Append new products to local database
+    console.log('===================================================');
     console.log("Appending", updates.productsLength, "products to local database")
-    helpers.addProductsToLocalDatabase(updates.newProducts);
-    
+
+    database.addProducts(updates.newProducts);
+
     // async call to bling API with new products
     console.log("Appending", updates.productsLength, "products bling database")
     try {
@@ -66,4 +64,8 @@ async function updateDatabase(oldDatabase, newDatabase) {
 
 }
 
-module.exports = { init, readDatabase, updateDatabase };
+async function updateProduct(product) {
+  return await database.updateProduct(product);
+};
+
+module.exports = { init, readDatabase, updateDatabase, updateProduct };

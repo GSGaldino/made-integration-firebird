@@ -31,6 +31,7 @@ module.exports = {
     const produto = req.body.produto || -1;
     if (produto) {
       const xml = builder.create('produto')
+      const estoque = await helpers.calculateBlingStock(produto);
 
       try {
 
@@ -49,7 +50,8 @@ module.exports = {
         xml.ele('profundidade', produto.prof)
         xml.ele('class_fiscal', produto.class_fiscal)
         xml.ele('origem', produto.trib_a)
-        xml.ele('estoque', (Number(produto.estoque_disponivel_01) + Number(produto.estoque_disponivel_02) + Number(produto.estoque_disponivel_08)))
+        xml.ele('estoque', estoque),
+        xml.ele('idGrupoProduto', produto.trib_a === "1" ? "265232" : "265231")
 
         // Get fbits urls and append to main xml
         const imagesTag = xml.ele('imagens');

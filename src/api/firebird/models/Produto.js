@@ -81,7 +81,19 @@ class Produto {
   this.estoque_disponivel_08 =
     database_row["ESTOQUE_DISPONIVEL_08"]
       ? database_row["ESTOQUE_DISPONIVEL_08"]
-      : null
+      : null,
+  this.estoque_reservado_01 =
+  database_row["ESTOQUE_RESERVADO_01"]
+    ? database_row["ESTOQUE_RESERVADO_01"]
+    : null,
+  this.estoque_reservado_02 =
+  database_row["ESTOQUE_RESERVADO_02"]
+    ? database_row["ESTOQUE_RESERVADO_02"]
+    : null,
+  this.estoque_reservado_08 =
+  database_row["ESTOQUE_RESERVADO_08"]
+    ? database_row["ESTOQUE_RESERVADO_08"]
+    : null,
   this.cor_id = database_row["COR_ID"] ? database_row["COR_ID"] : null,
   this.preco_sugerido = database_row["PRECO_SUGERIDO"] ? database_row["PRECO_SUGERIDO"] : null,
   this.preco_internet = database_row["PRECO_INTERNET"] ? database_row["PRECO_INTERNET"] : null,

@@ -5,6 +5,7 @@ node_modules/
 
 # Local database created in execution time
 database.json
+last_update.timestamp.json
 
 # lock files
 yarn.lock
